@@ -1,34 +1,50 @@
+from functools import reduce
+from collections import defaultdict
 class Solution:
-    # @param s, an input string
-    # @param p, a pattern string
-    # @return a boolean
-    def isMatch(self, s, p):
-        m,n = len(s),len(p)
-        cnt =p.count('*')
-        if n - cnt > m:
-            return False
-        
-        dp=[True] + [False]*n
+    def findWords(self, board, words):
+        """
+        :type board: List[List[str]]
+        :type words: List[str]
+        :rtype: List[str]
+        """
+#        words="hack"
+        Trie = lambda : defaultdict(Trie)
+        trie = Trie()
+        for w in words:
+            end = reduce(dict.__getitem__, w, trie)
+            end['#'] = '#'
+            end['$'] = w
 
-        for j in range(1,n+1):
-            dp[j]= dp[j-1] and p[j-1]=='*'
-        
-        for i in range(1,m+1):
-            cur=[False]*(n+1)
-            for j in range(1,n+1):
-                if p[j-1]=='*':
-                    cur[j]= cur[j-1] or dp[j]
-                elif p[j-1]==s[i-1] or p[j-1]=='?':                   
-                    cur[j]=dp[j-1]   
-            dp=cur
-        return dp[n]
+        self.res = set()
+        self.used = [[False] * len(board[0]) for _ in range(len(board))]
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                self.find(board, i, j, trie)
+        return list(self.res)
 
-cl=Solution()
-cl.isMatch("ab", "?*")   
-cl.isMatch("aa", "a")
-cl.isMatch("aa", "*") 
-cl.isMatch("aa", "a*") 
-cl.isMatch("ab", "?*") 
-cl.isMatch("aab", "c*a*b")  
+    def find(self, board, i, j, trie):
+        if '#' in trie:
+            self.res.add(trie['$'])
+        if i < 0 or i >= len(board) or j < 0 or j >= len(board[0]):
+            return
+        if not self.used[i][j] and board[i][j] in trie:
+            self.used[i][j] = True
+            self.find(board, i + 1, j, trie[board[i][j]])
+            self.find(board, i, j + 1, trie[board[i][j]])
+            self.find(board, i - 1, j, trie[board[i][j]])
+            self.find(board, i, j - 1, trie[board[i][j]])
+            self.used[i][j] = False
 
 
+words = ["oath","pea","eat","rain","oak","ath","kae","ner"] 
+board =[  ['o','a','a','n'],
+  ['e','t','a','e'],
+  ['i','h','k','r'],
+  ['i','f','l','v']]
+len(board)
+board[0][0]
+board[1]
+type(words)
+type(board)
+l=Solution()
+l.findWords(board,words)
